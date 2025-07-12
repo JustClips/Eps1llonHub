@@ -5,16 +5,16 @@ local function loadModule(path)
     return assert(loadstring(src))()
 end
 
--- 1) Fetch your UI‐lib (modules/ui.lua)
+-- 1) Load UI library
 local UILib = loadModule("modules/ui.lua")
 
--- 2) Create the main window
+-- 2) Create main window
 local Window = UILib:NewWindow({
     Title = "Eps1llon Hub 2025",
     Size  = UDim2.fromOffset(600, 500),
 })
 
--- 3) Grab each section (UI‐lib paints the icons/titles)
+-- 3) Grab sections
 local sections = {
     Configuration = UILib:GetSection("Configuration"),
     Combat        = UILib:GetSection("Combat"),
@@ -24,27 +24,16 @@ local sections = {
     ["UI Settings"]= UILib:GetSection("UI Settings"),
 }
 
--- 4) Load & wire your modules into each section
--- Configuration (if you have one)
--- local Config = loadModule("modules/configuration.lua")
--- Config:SetupTab(sections.Configuration)
+-- 4) Wire up feature modules
 
--- Combat features
+-- Combat (uses SetupTab)
 local Aimbot = loadModule("modules/aimbot.lua")
 Aimbot:SetupTab(sections.Combat)
 
--- ESP features
+-- ESP (uses Setup and takes the UI-lib)
 local ESP = loadModule("modules/esp.lua")
-ESP:SetupTab(sections.ESP)
+ESP:Setup(UILib)
 
--- Inventory features (if any)
--- local Inventory = loadModule("modules/inventory.lua")
--- Inventory:SetupTab(sections.Inventory)
-
--- Misc features
+-- Misc / Utilities (uses SetupTab)
 local Utils = loadModule("modules/utils.lua")
 Utils:SetupTab(sections.Misc)
-
--- UI Settings (if any)
--- local UIControls = loadModule("modules/uicontrols.lua")
--- UIControls:SetupTab(sections["UI Settings"])
