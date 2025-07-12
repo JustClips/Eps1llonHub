@@ -1,0 +1,23 @@
+# Test files and temporary scripts
+test_*.lua
+temp_*.lua
+*.tmp
+
+# IDE and editor files
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.o
+*.so
+*.dll
+luac.out
+
+# Logs
+*.log
