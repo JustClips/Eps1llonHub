@@ -4,13 +4,14 @@ local Players    = game:GetService("Players")
 local camera     = workspace.CurrentCamera
 local player     = Players.LocalPlayer
 
+-- Internal ESP state
 local espSettings = {
     Name=false, HP=false, Armor=false, Distance=false,
     Team=false, Age=false, Holding=false, Highlight=false,
 }
-
--- helper to clear old drawings
 local espObjects = {}
+
+-- Clear previous drawings
 local function clearESP()
     for _, list in pairs(espObjects) do
         for _, d in ipairs(list) do
@@ -20,7 +21,7 @@ local function clearESP()
     table.clear(espObjects)
 end
 
--- main render function
+-- Main render loop
 local function renderESP()
     clearESP()
     local anyOn = false
@@ -30,7 +31,7 @@ local function renderESP()
     if not anyOn then return end
 
     for _, pl in ipairs(Players:GetPlayers()) do
-        if pl ~= player and pl.Character then
+        if pl~=player and pl.Character then
             local hrp  = pl.Character:FindFirstChild("HumanoidRootPart")
             local head = pl.Character:FindFirstChild("Head")
             local hum  = pl.Character:FindFirstChildOfClass("Humanoid")
@@ -38,22 +39,22 @@ local function renderESP()
                 local pos,on = camera:WorldToViewportPoint(head.Position + Vector3.new(0,0.3,0))
                 if not on then continue end
 
-                -- highlight logic (if toggled)
+                -- Highlight toggle
                 local hl = pl.Character:FindFirstChild("ESP_Highlight")
                 if espSettings.Highlight then
                     if not hl then
                         hl = Instance.new("Highlight", pl.Character)
-                        hl.Name               = "ESP_Highlight"
-                        hl.Adornee            = pl.Character
-                        hl.FillTransparency   = 0.5
-                        hl.OutlineTransparency= 0
+                        hl.Name                = "ESP_Highlight"
+                        hl.Adornee             = pl.Character
+                        hl.FillTransparency    = 0.5
+                        hl.OutlineTransparency = 0
                     end
                     hl.FillColor = (pl.Team and pl.Team.TeamColor.Color) or Color3.new(1,1,1)
                 elseif hl then
                     hl:Destroy()
                 end
 
-                -- build your text lines
+                -- Gather lines
                 local dist = math.floor((hrp.Position - player.Character.HumanoidRootPart.Position).Magnitude)
                 local hp   = math.floor(hum.Health)
                 local vf   = pl.Character:FindFirstChild("Values")
@@ -73,19 +74,18 @@ local function renderESP()
                 if espSettings.Distance then table.insert(top, dist.." studs") end
                 if #top>0 then table.insert(lines, table.concat(top," | ")) end
 
-                if espSettings.Team     then table.insert(bot, "Team: "..(pl.Team and pl.Team.Name or "None")) end
-                if espSettings.Age      then table.insert(bot, "Age: "..age) end
+                if espSettings.Team then table.insert(bot, "Team: "..(pl.Team and pl.Team.Name or "None")) end
+                if espSettings.Age  then table.insert(bot, "Age: "..age) end
                 if #bot>0 then table.insert(lines, table.concat(bot," | ")) end
-
                 if espSettings.Holding and toolName then
                     table.insert(lines, "Holding: "..toolName)
                 end
 
-                -- draw each line
+                -- Draw text
                 local totalH = #lines * 18
                 local startY = pos.Y - totalH/2
                 local drawn = {}
-                for i, txt in ipairs(lines) do
+                for i,txt in ipairs(lines) do
                     local d = Drawing.new("Text")
                     d.Text         = txt
                     d.Size         = 16
@@ -106,9 +106,8 @@ end
 
 local ESP = {}
 
--- this gets called from your loader, passing in the UI-lib instance
+-- Called from loader with UI-lib instance
 function ESP:Setup(UI)
-    -- define your eight toggles in two columns
     local defs = {
         {"Show Names",       "Name",      20,  20},
         {"Show HP",          "HP",        20,  70},
@@ -132,7 +131,6 @@ function ESP:Setup(UI)
         })
     end
 
-    -- hook the render step once, always-on (it skips if no settings toggled)
     RunService:BindToRenderStep("Eps1llonESP", Enum.RenderPriority.Last.Value, renderESP)
 end
 
